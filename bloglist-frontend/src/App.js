@@ -3,6 +3,8 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -14,6 +16,11 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [okMessage, setOkMessage] = useState(null)
+  //const [blogFormVisible, setBlogFormVisible] = useState(false)
+
+  //FIXME
+  //const hideWhenVisibleCreate = { display: blogFormVisible ? 'none' : '' }
+  //const showWhenVisibleCreate = { display: blogFormVisible ? '' : 'none' }
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -51,6 +58,7 @@ const App = () => {
         setTimeout(() => {
           setOkMessage(null)
         }, 5000)
+        //setBlogFormVisible(true)
       })
       .catch(error => {
         setErrorMessage(
@@ -132,35 +140,18 @@ const App = () => {
   )
 
   const blogForm = () => (
-    <div><h2>blogs</h2>
-      <p>{user.name} logged-in
-        <button onClick={handleClickLockout}>
-          logout
-        </button>
-      </p>
-      <h2>create new</h2>
-      <form onSubmit={addBlog}>
-        Title:
-        <input
-          value={newBlogTitle}
-          onChange={handleBlogChangeTitle}
-        /><br />
-        Author:
-        <input
-          value={newBlogAuthor}
-          onChange={handleBlogChangeAuthor}
-        /><br />
-        Url:
-        <input
-          value={newBlogUrl}
-          onChange={handleBlogChangeUrl}
-        /><br />
-        <button type="submit">save</button>
-      </form><br />
-      {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
-        )}
-    </div>  
+    <Togglable buttonLabel="new blog" /*showWhenVisibleCreate={showWhenVisibleCreate}*/>
+      <BlogForm
+        onSubmit={addBlog}
+        valueTitle={newBlogTitle}
+        valueAuthor={newBlogAuthor}
+        valueUrl={newBlogUrl}
+        handleChangeTitle={handleBlogChangeTitle}
+        handleChangeAuthor={handleBlogChangeAuthor}
+        handleChangeUrl={handleBlogChangeUrl}
+        //hideWhenVisibleCreate={hideWhenVisibleCreate}
+      />
+    </Togglable>
   )
 
   return (
@@ -168,7 +159,18 @@ const App = () => {
       <Notification messageErr={errorMessage} messageOk={okMessage} />
       {user === null ?
         loginForm() :
-        blogForm()
+        <div>
+          <h2>blogs</h2>
+          <p>{user.name} logged-in
+          <button onClick={handleClickLockout}>
+            logout
+          </button>
+          </p>
+          {blogForm()}
+          {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} />
+          )}
+        </div>
       }
     </div>
   )
